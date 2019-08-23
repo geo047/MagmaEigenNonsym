@@ -442,55 +442,6 @@ magma_free_cpu( VR);
 return 0;
  
 
-/* 
-	if ( MAGMA_SUCCESS != magma_malloc_pinned( (void**) &work, (lwork)*sizeof(double) )) 
-	{      
-		shrd_server->error_and_die(" MAGMA_EVD_SERVER Error: magma_dgeev_mgpu() magma_malloc_pinned failed for: work" );                                                         
-	}
-
-	if ( MAGMA_SUCCESS != magma_malloc_cpu( (void**) &iwork, (liwork)*sizeof(magma_int_t) )) {      
-		shrd_server->error_and_die("MAGMA_EVD_SERVER Error: magma_dgeev_mgpu() magma_malloc_cpu failed for: iwork" );                                                          
-	}		
-	
-	m = 0; 
-	if (hideorprint == PRINT) std::cout << "About to call magma_dgeev()..."<< std::endl ;
-   
-	if (shrd_server->_numgpus == 1) {
-      //printf("calling dgeev 1 GPU\n");
-      magma_dsyevdx_2stage( jobv, range, uplo, n, 
-                      rvectors_ptr, n, 
-                      vl, vu, il, iu, 
-                      &m, rvalues_ptr, 
-                      work, lwork, 
-                      iwork, liwork, 
-                      &info);	
-  } else {
-      //printf("calling dgeev_m %ld GPU\n", (long int) opts.ngpu);
-      magma_dsyevdx_2stage_m(shrd_server->_numgpus, jobv, range, uplo, n, 
-                      rvectors_ptr, n, 
-                      vl, vu, il, iu, 
-                      &m, rvalues_ptr, 
-                      work, lwork, 
-                      iwork, liwork, 
-                      &info);
-  }
-  
-  if (hideorprint == PRINT)
-  {
-    std::cout << "The largest 4 eigenvalues found"<< std::endl ;
-    for (int t1 = 1 ; t1 < 5 ; t1++)
-    {
-      std::cout << rvalues_ptr[n-t1] << ",\t" ;
-    }
-    std::cout << std::endl ;
-  }
-  
-  magma_free_cpu (iwork)  ;
-  magma_free_pinned(work) ;
-   
-	return (info) ;
-*/
-	
 }
 
 void server_close( ) 
