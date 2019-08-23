@@ -323,20 +323,19 @@ int server_compute_dgeev_mgpu( hideprintlog hideorprint )
 {
   
   magma_int_t n, n2,  lwork2, info = 0;  // define MAGMA_ILP64 to get these as 64 bit integers
-	magma_vec_t jobv ;  // tell the function if we want eigenvectors or not
-	if (shrd_server->_weWantVectors == WANTVECTORS)
-		jobv = MagmaVec;  // we want vectors returned, not just eigenvalues
-	else
-		jobv = MagmaNoVec ;
-	magma_uplo_t uplo =  MagmaLower; // MagmaUpper;	
-	magma_range_t range = magma_range_const('A') ; // MagmaRangeAll ;
+  magma_vec_t jobv ;  // tell the function if we want eigenvectors or not
+  if (shrd_server->_weWantVectors == WANTVECTORS)
+     jobv = MagmaVec;  // we want vectors returned, not just eigenvalues
+   else
+     jobv = MagmaNoVec ;
+   magma_uplo_t uplo =  MagmaLower; // MagmaUpper;	
+   magma_range_t range = magma_range_const('A') ; // MagmaRangeAll ;
 	
-	double fraction = 1.0 ;
+  double fraction = 1.0 ;
   double  *rvectors_ptr, *rvalues_ptr ;
   magma_int_t liwork, *iwork, m;
   double vl = 0.0, vu = 0.0, abstol = 0.0;
   
- 
     
   if (shrd_server == NULL)
   {
@@ -344,12 +343,12 @@ int server_compute_dgeev_mgpu( hideprintlog hideorprint )
     return(-1) ;
   }
   
-	n = shrd_server->_matrix_dim ;
-	n2     = n*n;
-	magma_int_t il = 1;
-	magma_int_t iu = n;
-	il = 1;
-	iu = (magma_int_t) (n);
+  n = shrd_server->_matrix_dim ;
+  n2     = n*n;
+  magma_int_t il = 1;
+  magma_int_t iu = n;
+  il = 1;
+  iu = (magma_int_t) (n);
 
   if (hideorprint == PRINT) {
   	std::cout << " MAGMA_EVD_SERVER Info: dgeev  called using: jobv = " << lapack_vec_const(jobv) ;
@@ -360,24 +359,24 @@ int server_compute_dgeev_mgpu( hideprintlog hideorprint )
   	std::cerr << " MAGMA_EVD_SERVER:  sizeof(magma_int_t)= " << sizeof(magma_int_t)  << std::endl ;
   }
 	
-	// We could create a copy of the input matrix, in 'pinned' memory
-	// rvectors_ptr (was h_R) will initially be a copy of the input matrix  // TESTING_MALLOC_PIN( h_R,    double, n2    );
-	/*if ( MAGMA_SUCCESS != magma_malloc_pinned( (void**) &rvectors_ptr, (n2)*sizeof(double) )) {       
+  // We could create a copy of the input matrix, in 'pinned' memory
+  // rvectors_ptr (was h_R) will initially be a copy of the input matrix  // TESTING_MALLOC_PIN( h_R,    double, n2    );
+  /*if ( MAGMA_SUCCESS != magma_malloc_pinned( (void**) &rvectors_ptr, (n2)*sizeof(double) )) {       
 		shrd_server->error_and_die("Error magma_dgeev_mgpu(): !!!! magma_malloc_pinned failed for: rvectors_ptr") ; 		                                                           
 	}*/
 	
-	//Rcpp::NumericVector rvalues(n) 	 ;
-	rvalues_ptr = shrd_server->_values ;
-	rvectors_ptr = shrd_server->_vectors ;  // was rx
+   //Rcpp::NumericVector rvalues(n) 	 ;
+   rvalues_ptr = shrd_server->_values ;
+  rvectors_ptr = shrd_server->_vectors ;  // was rx
 
 
-       // AWG
-       // Make copy of rvectors_ptr => *A 
-       double *A;
-       magma_dmalloc_cpu(&A, n2);   // to house data that will be lost 
-       for(int i=0; i<n2; i++){
-          A[i] = rvectors_ptr[i];
-       }
+  // AWG
+ // Make copy of rvectors_ptr => *A 
+ double *A;
+ magma_dmalloc_cpu(&A, n2);   // to house data that will be lost 
+ for(int i=0; i<n2; i++){
+     A[i] = rvectors_ptr[i];
+ }
 	
   // ask for optimal size of work arrays 
   // ----> lwork = -1; liwork = -1;
@@ -394,11 +393,10 @@ int server_compute_dgeev_mgpu( hideprintlog hideorprint )
   if ( shrd_server->_weWantVectors == WANTVECTORS)
    b_wantVects = true ;
    
-// ---->   magma_dgeev_getworksize(n, threads, b_wantVects, &lwork, &liwork); 
    
   // AWG
   // get work size
-            magma_int_t lda, LDVL, LDVR;
+  magma_int_t lda, LDVL, LDVR;
             LDVL=n;
             LDVR=n;
             lda   = n;
@@ -415,22 +413,8 @@ int server_compute_dgeev_mgpu( hideprintlog hideorprint )
             double work[1];   
 
 
-        // get optimal workspace size  
-magma_dgeev(MagmaVec,
-MagmaNoVec,
-n,
-NULL,
-lda,
-NULL,
-NULL,
-NULL,
-LDVL,
-NULL,
-LDVR,
-work,
--1,
-&info 
-);	
+  // get optimal workspace size  
+  magma_dgeev(MagmaVec, MagmaNoVec, n, NULL, lda, NULL, NULL, NULL, LDVL, NULL, LDVR, work, -1, &info );	
 
 //std::cout << info << std::endl;
 //std::cout << work[0] << std::endl;
@@ -444,28 +428,6 @@ magma_dgeev(MagmaNoVec, MagmaVec, n, A, lda, rvalues_ptr, wl, VL, LDVL, rvectors
               lwork, &info);
 
 
-
-
-//magma_dgeev(MagmaNoVec, MagmaVec, n, A, lda, rvalues_ptr, wl, VL, LDVL, VR, LDVR, h_work,
-//                 lwork, &info);
-std::cout << info << std::endl;
-
-
-
-// testing that this print statemetn is working correctly 
-std::cout << "eigenvalues ... " << std::endl;
-for(int i=0; i<n; i++){
-  std::cout << rvalues_ptr[i] << " " ;
-}
-std::cout << std::endl;
-
-std::cout << "eigenvectors ... " << std::endl;
-for(int i=0; i<25; i++){
-  std::cout << rvectors_ptr[i] << " " ;
-}
-std::cout << std::endl;
-std::cout << " contents of VR " << std::endl;
-magma_dprint(5,5, VR, n);
 
 
 
