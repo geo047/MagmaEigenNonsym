@@ -441,9 +441,8 @@ magma_free_cpu( VR);
 
 return 0;
  
-std::cout << " Im in here " << std::endl;
 
- 
+/* 
 	if ( MAGMA_SUCCESS != magma_malloc_pinned( (void**) &work, (lwork)*sizeof(double) )) 
 	{      
 		shrd_server->error_and_die(" MAGMA_EVD_SERVER Error: magma_dgeev_mgpu() magma_malloc_pinned failed for: work" );                                                         
@@ -490,6 +489,7 @@ std::cout << " Im in here " << std::endl;
   magma_free_pinned(work) ;
    
 	return (info) ;
+*/
 	
 }
 
