@@ -430,10 +430,6 @@ magma_dgeev(MagmaNoVec, MagmaVec, n, A, lda, rvalues_ptr, wl, VL, LDVL, rvectors
 
 
 
-
-
-
-
 magma_free_cpu( h_work);
 magma_free_cpu( A);
 magma_free_cpu( wr);
@@ -445,6 +441,7 @@ magma_free_cpu( VR);
 
 return 0;
  
+std::cout << " Im in here " << std::endl;
 
  
 	if ( MAGMA_SUCCESS != magma_malloc_pinned( (void**) &work, (lwork)*sizeof(double) )) 

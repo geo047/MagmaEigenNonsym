@@ -33,9 +33,6 @@ res <- K %*% crossprod(Z, Z)
   vectorsCPU = qr.Q(qr(Z %*% eigCPU$vectors), complete = TRUE)
   vectorsCPU = vectorsCPU[, indx]
 
-
-
-
    print(vectorsGPU[1:5, 1:5])
    print("---------------------")
    print(vectorsCPU[1:5, 1:5])
