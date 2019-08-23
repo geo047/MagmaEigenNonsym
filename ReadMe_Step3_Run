@@ -14,22 +14,26 @@ for(ii in 1:(2*n)){
 ## Equal but with some reordering 
 res <- K %*% crossprod(Z, Z)
 
-# GPU based
+# CPU based
  library(MagmaEigenNonsym)
  MagmaEigenNonsym::RunServer( matrixMaxDimension=n,  numGPUsWanted=ngpu, memName="/syevd_mem", semName="/syevd_sem", print=0)
 
   eigGPU <- MagmaEigenNonsym::eigen_nonsym_mgpu(res , symmetric = FALSE , only_values=FALSE)
   indx <- order(eigGPU$values, decreasing=TRUE)
-   eigGPU$vectors <-  eigGPU$vectors[, indx]
-   eigGPU$values <- eigGPU$values[indx]
 
-  valuesGPU = eigGPU$values
+  valuesGPU = eigGPU$values[indx]
   vectorsGPU = qr.Q(qr(Z %*% eigGPU$vectors), complete = TRUE)
+  vectorsGPU = vectorsGPU[, indx]
 
  ## CPU 
-   eig <- eigen(res, symmetric = FALSE, EISPACK = TRUE)
-   valuesCPU = eig$values
-   vectorsCPU = qr.Q(qr(Z %*% eig$vectors), complete = TRUE)
+   eigCPU <- eigen(res, symmetric = FALSE, EISPACK = TRUE)
+   indx <- order(eigCPU$values, decreasing=TRUE)
+
+  valuesCPU = eigCPU$values[indx]
+  vectorsCPU = qr.Q(qr(Z %*% eigCPU$vectors), complete = TRUE)
+  vectorsCPU = vectorsCPU[, indx]
+
+
 
 
    print(vectorsGPU[1:5, 1:5])
